@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 对应dao接口 -->
+<mapper namespace="com.dao.OrderDao">
+
+	<resultMap type="Order" id="OrderResult">
+		<result property="id" column="id"/>
+		<result property="orderNo" column="orderNo"/>
+		<result property="orderDate" column="orderDate"/>
+		<result property="address" column="address"/>
+		<result property="state" column="state"/>
+		<association property="customer" column="cusId" select="com.dao.CustomerDao.findCustomerById"></association>
+	</resultMap>
+	
+	
+	<select id="findOrderList" parameterType="Map" resultMap="OrderResult">
+	    select * from t_customer_order
+	    <where>
+	        <if test="cusId!=null">
+	            and cusId = #{cusId}
+	        </if>
+	    </where>
+	    <if test="start!=null and size!=null">
+	        limit #{start},#{size}
+	    </if>
+	</select>
+	
+	<select id="getTotal" parameterType="Map" resultType="Long">
+	    select count(*) from t_customer_order
+	   <where>
+	        <if test="cusId!=null">
+	            and cusId like #{cusId}
+	        </if>
+	    </where>
+	</select>
+	
+	
+	<insert id="addOrder" parameterType="Order">
+	    insert into t_customer_order values(null,#{customer.id},#{orderNo},#{orderDate},#{address},#{state})
+	</insert>
+	
+	<update id="updateOrder" parameterType="Order">
+	    update t_customer_order 
+	    <set>
+	        <if test="orderNo!=null and orderNo!=''"> 
+	            orderNo = #{orderNo},
+	        </if>
+	        <if test="orderDate!=null">
+	            orderDate= #{orderDate},
+	        </if>
+	         <if test="address!=null and address!=''">
+	            address= #{address},
+	        </if>
+	         <if test="state!=null">
+	            state= #{state},
+	        </if>
+	    </set>
+	    where id=#{id}
+	</update>
+	
+	<delete id="deleteOrder" parameterType="Integer">
+	    delete from t_customer_order where id=#{id}
+	</delete>
+	
+	<select id="findLastOrderByCusId" parameterType="Integer" resultMap="OrderResult">
+	    SELECT * FROM t_customer_order WHERE cusId=#{id} ORDER BY orderDate DESC LIMIT 0,1;
+	</select>
+
+</mapper> 
